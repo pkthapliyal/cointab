@@ -15,6 +15,7 @@ import {
   Card,
   TableContainer,
 } from "@chakra-ui/react";
+import PostTable from "../components/PostTable";
 
 function Post() {
   const [posts, setPosts] = useState([]);
@@ -31,7 +32,7 @@ function Post() {
 
   const { userId } = useParams();
 
-  const SERVER_URL = "http://localhost:3001";
+  const SERVER_URL = "https://coinab-assignment.onrender.com";
 
   const navigate = useNavigate();
 
@@ -191,60 +192,7 @@ function Post() {
         </Box>
       )}
 
-      {posts.length !== 0 && (
-        <TableContainer
-          width={"90%"}
-          margin={"auto"}
-          shadow={5}
-          borderRadius={"5"}
-        >
-          <Table
-            size={"lg"}
-            colorScheme="pink"
-            fontSize={"16px"}
-            variant={"striped"}
-            border={"4px solid #ED64A6"}
-            whiteSpace="normal"
-            id="myTable"
-          >
-            <Thead>
-              <Tr h={16} bg={"#ED64A6"}>
-                <Th fontSize={"16px"} color={"white"}>
-                  Post Id
-                </Th>
-                <Th fontSize={"16px"} color={"white"}>
-                  Title
-                </Th>
-                <Th fontSize={"16px"} color={"white"}>
-                  Body
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {posts.map((post) => (
-                <Tr>
-                  <Td fontSize={"16px"}>{post.id}</Td>
-                  <Td fontSize={"16px"}>{post.title}</Td>
-                  <Td fontSize={"16px"}>{post.body}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-            <Tfoot>
-              <Tr h={16} bg={"#ED64A6"}>
-                <Th fontSize={"16px"} color={"white"}>
-                  Post Id
-                </Th>
-                <Th fontSize={"16px"} color={"white"}>
-                  Title
-                </Th>
-                <Th fontSize={"16px"} color={"white"}>
-                  body
-                </Th>
-              </Tr>
-            </Tfoot>
-          </Table>
-        </TableContainer>
-      )}
+      {posts.length !== 0 && <PostTable posts={posts} />}
     </Box>
   );
 }
