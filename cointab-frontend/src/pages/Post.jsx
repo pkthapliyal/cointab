@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Box, Heading, Text, Button } from "@chakra-ui/react";
+import { Box, Heading, Text, Button, useToast } from "@chakra-ui/react";
 import { MdFileDownload } from "react-icons/md";
+import * as XLSX from "xlsx";
 
 import {
   Table,
@@ -12,12 +13,12 @@ import {
   Th,
   Td,
   Card,
-  TableCaption,
   TableContainer,
 } from "@chakra-ui/react";
 
 function Post() {
   const [posts, setPosts] = useState([]);
+  const toast = useToast();
   const [userDetails, setUserDetails] = useState([]);
 
   const [postAdded, setPostAdded] = useState(null);
@@ -34,7 +35,7 @@ function Post() {
 
   const navigate = useNavigate();
 
-  const fetchUsers = async () => {
+  const fetchAllPosts = async () => {
     try {
       const response = await fetch(`${MOCK_API_POST}?userId=${userId}`);
 
@@ -65,14 +66,14 @@ function Post() {
 
   useEffect(() => {
     setUserDetails(user);
-    fetchUsers();
+    fetchAllPosts();
   }, []);
 
   const handlebulkAdd = async (e) => {
     e.preventDefault();
 
     const postToBeAdded = posts.map((post) => {
-      return { id: post.id, title: post.title, body: post.body };
+      return { postId: post.id, title: post.title, body: post.body };
     });
 
     // console.log(postToBeAdded);
@@ -92,19 +93,53 @@ function Post() {
 
       if (postAdded.ok && postAdded.status !== 409) {
         const post = await postAdded.json();
+        toast({
+          title: "Sucess",
+          description: "Posts are added in bulk",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+
+        setPostAdded(true);
         console.log(post); // alert
       } else {
         const error = await postAdded.json();
         console.log(error); // alert
+        toast({
+          title: "Warning",
+          description: "Posts are already added !!",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const downLoadPostInExcel = () => {
+    console.log(posts);
+    let postsToExcel = posts.map((obj) => Object.values(obj));
+    // console.log(postsToExcel);
+
+    let headings = ["UserId", "PostId", "Title", "Body"];
+    postsToExcel.unshift(headings);
+
+    const workSheet = XLSX.utils.aoa_to_sheet(postsToExcel);
+
+    const workBook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workBook, workSheet, "Sheet1");
+
+    // Save the workbook as an Excel file
+    XLSX.writeFile(workBook, `${user.name.split(" ").join("-")}-Posts.xlsx`);
+  };
+
   return (
     <Box pb={20}>
-      <Heading color={"#ED64A6"} mt={4} mb={4} zIndex={5}>
+      <Heading color={"#D53F8C"} mt={4} mb={4} zIndex={5}>
         All Posts
       </Heading>
 
@@ -136,6 +171,7 @@ function Post() {
                 bg={"#ED64A6"}
                 _hover={{ bg: "#B83280" }}
                 rightIcon={<MdFileDownload />}
+                onClick={downLoadPostInExcel}
               >
                 Download in Excel
               </Button>
@@ -155,57 +191,60 @@ function Post() {
         </Box>
       )}
 
-      <TableContainer
-        width={"90%"}
-        margin={"auto"}
-        shadow={5}
-        borderRadius={"5"}
-      >
-        <Table
-          size={"lg"}
-          colorScheme="pink"
-          fontSize={"16px"}
-          variant={"striped"}
-          border={"4px solid #ED64A6"}
-          whiteSpace="normal"
+      {posts.length !== 0 && (
+        <TableContainer
+          width={"90%"}
+          margin={"auto"}
+          shadow={5}
+          borderRadius={"5"}
         >
-          <Thead>
-            <Tr h={16} bg={"#ED64A6"}>
-              <Th fontSize={"16px"} color={"white"}>
-                Post Id
-              </Th>
-              <Th fontSize={"16px"} color={"white"}>
-                Title
-              </Th>
-              <Th fontSize={"16px"} color={"white"}>
-                Body
-              </Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {posts.map((post) => (
-              <Tr>
-                <Td fontSize={"16px"}>{post.id}</Td>
-                <Td fontSize={"16px"}>{post.title}</Td>
-                <Td fontSize={"16px"}>{post.body}</Td>
+          <Table
+            size={"lg"}
+            colorScheme="pink"
+            fontSize={"16px"}
+            variant={"striped"}
+            border={"4px solid #ED64A6"}
+            whiteSpace="normal"
+            id="myTable"
+          >
+            <Thead>
+              <Tr h={16} bg={"#ED64A6"}>
+                <Th fontSize={"16px"} color={"white"}>
+                  Post Id
+                </Th>
+                <Th fontSize={"16px"} color={"white"}>
+                  Title
+                </Th>
+                <Th fontSize={"16px"} color={"white"}>
+                  Body
+                </Th>
               </Tr>
-            ))}
-          </Tbody>
-          <Tfoot>
-            <Tr h={16} bg={"#ED64A6"}>
-              <Th fontSize={"16px"} color={"white"}>
-                Post Id
-              </Th>
-              <Th fontSize={"16px"} color={"white"}>
-                Title
-              </Th>
-              <Th fontSize={"16px"} color={"white"}>
-                body
-              </Th>
-            </Tr>
-          </Tfoot>
-        </Table>
-      </TableContainer>
+            </Thead>
+            <Tbody>
+              {posts.map((post) => (
+                <Tr>
+                  <Td fontSize={"16px"}>{post.id}</Td>
+                  <Td fontSize={"16px"}>{post.title}</Td>
+                  <Td fontSize={"16px"}>{post.body}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+            <Tfoot>
+              <Tr h={16} bg={"#ED64A6"}>
+                <Th fontSize={"16px"} color={"white"}>
+                  Post Id
+                </Th>
+                <Th fontSize={"16px"} color={"white"}>
+                  Title
+                </Th>
+                <Th fontSize={"16px"} color={"white"}>
+                  body
+                </Th>
+              </Tr>
+            </Tfoot>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 }

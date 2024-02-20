@@ -21,7 +21,6 @@ postRoute.get("/", async (req, res) => {
 
 postRoute.post("/", async (req, res) => {
   const { userId, posts } = req.body;
-
   try {
     const isPost = await Post.findOne({ userId: userId });
 
@@ -29,7 +28,7 @@ postRoute.post("/", async (req, res) => {
       return res.status(409).send({ message: "Posts are already added !" });
     }
 
-    const newPost = new Post(req.body);
+    const newPost = new Post({ userId, posts });
     await newPost.save();
     return res.status(201).send({ message: "Posts added" });
   } catch (error) {

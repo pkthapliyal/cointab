@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Heading, Text, Button } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 
 import {
   Table,
@@ -13,15 +14,18 @@ import {
   TableCaption,
   TableContainer,
 } from "@chakra-ui/react";
+import { useUserContext } from "./User.context";
 
 const HomePage = () => {
-  const [users, setUsers] = useState([]);
+  // const [users, setUsers] = useState([]);
+  const { users, setUsers } = useUserContext();
 
   const MOCK_API = "https://jsonplaceholder.typicode.com/users";
 
   const SERVER_URL = "http://localhost:3001";
 
   const navigate = useNavigate();
+  const toast = useToast();
 
   const fetchUsers = async () => {
     try {
@@ -53,6 +57,13 @@ const HomePage = () => {
         console.log(finalData);
         setUsers(finalData); //  setting the users data
       } else {
+        toast({
+          title: "Error In getting users",
+          description: "There is some error in getting users !!",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
         console.log("There is some error in fetching the Users");
       }
     } catch (error) {
@@ -63,12 +74,6 @@ const HomePage = () => {
   useEffect(() => {
     // fetchUsers();
   }, []);
-
-  const fetchAllUsers = (e) => {
-    e.preventDefault();
-
-    fetchUsers();
-  };
 
   const addUserInDb = async (user) => {
     const userData = {
@@ -92,14 +97,26 @@ const HomePage = () => {
       });
 
       if (userAdded.ok && userAdded.status !== 409) {
+        fetchUsers(); // fetch the user again
         const user = await userAdded.json();
         console.log(user); // alert
-
-        // fetch again
-        fetchAllUsers();
+        toast({
+          title: "Sucess",
+          description: "User added successfully !!",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
         const error = await userAdded.json();
         console.log(error); // alert
+        toast({
+          title: "Warning",
+          description: "User is already added !!",
+          status: "warning",
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error(error);
@@ -108,7 +125,7 @@ const HomePage = () => {
 
   return (
     <Box pb={20}>
-      <Heading color={"#ED64A6"} mt={4} mb={4} zIndex={5}>
+      <Heading color={"#D53F8C"} mt={4} mb={4} zIndex={5}>
         Cointab SE-ASSIGNMENT
       </Heading>
       <Button
@@ -119,7 +136,9 @@ const HomePage = () => {
         fontWeight={"600"}
         bg={"#ED64A6"}
         _hover={{ bg: "#B83280" }}
-        onClick={fetchAllUsers}
+        onClick={() => {
+          fetchUsers();
+        }}
       >
         All Users{" "}
       </Button>
