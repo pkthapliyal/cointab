@@ -11,7 +11,7 @@ const { postRoute } = require("./routes/post.route");
 // Essential Middleware
 const corsOptions = {
   origin: "https://cointab-8nxkejrxd-pkthapliyal.vercel.app",
-  methods: "GET,POST,PUT",
+  methods: ["GET", "POST", "PUT"],
   credentials: true,
 };
 
