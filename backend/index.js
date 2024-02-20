@@ -9,12 +9,14 @@ const { userRoute } = require("./routes/user.route");
 const { postRoute } = require("./routes/post.route");
 
 // Essential Middleware
+const corsOptions = {
+  origin: "https://cointab-8nxkejrxd-pkthapliyal.vercel.app/",
+  methods: "GET,POST, PUT",
+  credentials: true,
+};
+
 app.use(express.json());
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-  })
-);
+app.use(cors(corsOptions));
 
 //  Routes Middleware
 app.use("/users", userRoute);
