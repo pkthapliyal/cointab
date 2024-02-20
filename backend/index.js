@@ -21,7 +21,7 @@ app.use("/users", userRoute);
 app.use("/posts", postRoute);
 
 app.get("/", (req, res) => {
-  res.send("Hello, Express!");
+  res.send("Welcome to cointab");
 });
 
 app.listen(port, async () => {
